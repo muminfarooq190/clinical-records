@@ -8,7 +8,7 @@ test("create a case, extract a PDF, inspect its source and correct a fact", asyn
   await expect(page.getByText("A clearer view")).toBeVisible();
   await page.getByRole("button", { name: "Create your first case" }).click();
   await page.getByLabel("Case title").fill("Alex Example · discharge review");
-  await page.getByRole("button", { name: "Create case", exact: true }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Create case", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Alex Example · discharge review" }),
   ).toBeVisible();
