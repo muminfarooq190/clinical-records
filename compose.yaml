@@ -1,0 +1,47 @@
+x-app: &app
+  build: .
+  image: clinical-records:local
+  environment:
+    POSTGRES: Host=postgres;Database=records;Username=records;Password=demo
+    BLOB_CONNECTION: DefaultEndpointsProtocol=http;AccountName=records;AccountKey=cmVjb3Jkcy1kZW1vLXN0b3JhZ2Uta2V5;BlobEndpoint=http://storage:10000/records;
+    OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+  depends_on:
+    postgres:
+      condition: service_healthy
+    storage:
+      condition: service_started
+  restart: unless-stopped
+
+services:
+  api:
+    <<: *app
+    ports:
+      - "127.0.0.1:8080:8080"
+  worker:
+    <<: *app
+    command: ["--worker"]
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: records
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: records
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U records -d records"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+  storage:
+    image: mcr.microsoft.com/azure-storage/azurite:3.33.0
+    command: azurite-blob --blobHost 0.0.0.0 --location /data --skipApiVersionCheck --silent
+    environment:
+      AZURITE_ACCOUNTS: records:cmVjb3Jkcy1kZW1vLXN0b3JhZ2Uta2V5
+    volumes:
+      - documents:/data
+
+volumes:
+  database:
+  documents:
