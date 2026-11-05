@@ -16,6 +16,7 @@ test("create a case, extract a PDF, inspect its source and correct a fact", asyn
   const fact = page.locator(".fact-card").first();
   await expect(fact).toBeVisible({ timeout: 45000 });
   await expect(fact).toContainText("SYNTHETIC RECORD");
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: "test-results/workspace-desktop.png",
     fullPage: true,
@@ -42,6 +43,9 @@ test("create a case, extract a PDF, inspect its source and correct a fact", asyn
   const id = cases[0].id;
   const details = await (await request.get("/api/cases/" + id)).json();
   const current = details.facts[0];
+  const sourcePdf = await request.get("/api/cases/" + id + "/documents/" + current.document_id + "/file");
+  expect(sourcePdf.status()).toBe(200);
+  expect(sourcePdf.headers()["content-type"]).toContain("application/pdf");
   const stale = await request.patch(
     "/api/cases/" + id + "/facts/" + current.id,
     {

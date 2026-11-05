@@ -61,6 +61,8 @@ a svg {
   background: #fff;
   border-right: 1px solid #e3e9e4;
   position: fixed;
+  top: 0;
+  left: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -870,12 +872,14 @@ footer {
   }
   .workspace,
   .sidebar-bottom,
-  .side-heading,
   .search {
     display: none;
   }
   .brand {
     font-size: 17px;
+  }
+  .sidebar .side-heading {
+    margin: 16px 0 0;
   }
   .sidebar nav {
     display: flex;
